@@ -1,0 +1,52 @@
+[project]
+name = "esports-matches"
+version = "1.0.0"
+description = "Киберспортивные матчи из PandaScore API"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+    {name = "Your Name", email = "your@email.com"}
+]
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "python-dotenv>=1.0.0",
+    "httpx>=0.25.0",
+    "aiofiles>=23.0.0",
+    "jinja2>=3.1.0",
+    "slowapi>=0.1.9",
+    "cachetools>=6.2.6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "respx>=0.20.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# ВАЖНО: Указываем uv, что это приложение, а не библиотека
+[tool.uv]
+package = false
+
+# ВАЖНО: Указываем hatchling, какие файлы искать (если папка проекта не совпадает с name)
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "I", "W"]
+
+[tool.black]
+line-length = 100
+target-version = ['py39']
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
