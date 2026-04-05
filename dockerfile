@@ -1,37 +1,28 @@
 # Этап 1: Сборка и тесты
 FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS tester
-
 WORKDIR /app
-
-# Копируем конфигурацию и замок зависимостей
 COPY pyproject.toml uv.lock ./
-
-# Устанавливаем всё (включая pytest, respx) в строгом режиме
 RUN uv sync --all-extras --frozen
-
-# Копируем остальной код (включая папку tests)
 COPY . .
-
-# ЗАПУСК ТЕСТОВ: Если они упадут, сборка здесь прервется
 RUN uv run pytest
 
-
-# Этап 2: Финальный образ для работы
+# Этап 2: Финальный образ
 FROM python:3.13-slim
-
 WORKDIR /app
+
+# 1. Добавляем системные сертификаты для HTTPS запросов
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
 # Достаем бинарники uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# Копируем только конфиги для установки продакшен-пакетов
+# Копируем конфиги
 COPY pyproject.toml uv.lock ./
-
-# Ставим только рабочие зависимости (FastAPI, httpx и др.) без dev-пакетов
 RUN uv sync --no-dev --frozen
 
-# Копируем только исполняемый файл
-COPY main.py .
+# 2. КОПИРУЕМ ВСЁ (вместо только main.py), чтобы подтянулись все файлы и конфиги
+COPY . .
 
 EXPOSE 8000
+# Используем --host 0.0.0.0, чтобы API было доступно снаружи контейнера
 CMD ["uv", "run", "python", "main.py"]
