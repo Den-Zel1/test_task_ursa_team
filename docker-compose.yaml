@@ -2,11 +2,8 @@ version: '3.8'
 
 services:
   esports-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     container_name: esports_matches_site
-    # Убрали ports, чтобы приложение не было доступно напрямую
     expose:
       - "8000"
     env_file:
@@ -15,11 +12,6 @@ services:
       - PANDASCORE_TOKEN=${PANDASCORE_TOKEN}
       - UTC_OFFSET=3
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/today"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   nginx:
     image: nginx:latest
@@ -30,5 +22,5 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      esports-app:
-        condition: service_healthy # Ждет, пока приложение пройдет healthcheck
+      - esports-app
+
