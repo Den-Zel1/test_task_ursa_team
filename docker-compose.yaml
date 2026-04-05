@@ -6,8 +6,9 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: esports_matches_site
-    ports:
-      - "8000:8000"
+    # Убрали ports, чтобы приложение не было доступно напрямую
+    expose:
+      - "8000"
     env_file:
       - .env
     environment:
@@ -20,3 +21,14 @@ services:
       timeout: 10s
       retries: 3
 
+  nginx:
+    image: nginx:latest
+    container_name: nginx_proxy
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      esports-app:
+        condition: service_healthy # Ждет, пока приложение пройдет healthcheck
