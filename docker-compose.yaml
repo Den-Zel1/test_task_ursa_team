@@ -1,9 +1,11 @@
-version: '3.8'
-
 services:
   esports-app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: esports_matches_site
+    restart: always
+    # Открываем порт 8000 только внутри сети Docker для Nginx
     expose:
       - "8000"
     env_file:
@@ -11,7 +13,11 @@ services:
     environment:
       - PANDASCORE_TOKEN=${PANDASCORE_TOKEN}
       - UTC_OFFSET=3
-    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   nginx:
     image: nginx:latest
@@ -23,4 +29,8 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - esports-app
-
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
